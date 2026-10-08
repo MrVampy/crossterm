@@ -74,6 +74,7 @@ pub(crate) fn parse_event(
                         }
                     }
                     b'[' => parse_csi(buffer),
+                    b']' => crate::event::clipboard::parse(buffer),
                     b'\x1B' => Ok(Some(InternalEvent::Event(Event::Key(KeyCode::Esc.into())))),
                     _ => parse_event(&buffer[1..], input_available).map(|event_option| {
                         event_option.map(|event| {
@@ -180,6 +181,17 @@ pub(crate) fn parse_csi(buffer: &[u8]) -> io::Result<Option<InternalEvent>> {
         b'?' => match buffer[buffer.len() - 1] {
             b'u' => return parse_csi_keyboard_enhancement_flags(buffer),
             b'c' => return parse_csi_primary_device_attributes(buffer),
+            b'y' if buffer.ends_with(b"$y") => {
+                let body = std::str::from_utf8(&buffer[3..buffer.len() - 2])
+                    .map_err(|_| could_not_parse_event_error())?;
+                let (mode, state) = body
+                    .split_once(';')
+                    .ok_or_else(could_not_parse_event_error)?;
+                return Ok(Some(InternalEvent::Event(Event::PrivateMode {
+                    mode: mode.parse().map_err(|_| could_not_parse_event_error())?,
+                    state: state.parse().map_err(|_| could_not_parse_event_error())?,
+                })));
+            }
             _ => None,
         },
         b'0'..=b'9' => {

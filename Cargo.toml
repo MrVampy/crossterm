@@ -48,10 +48,10 @@ use-dev-tty = ["filedescriptor", "rustix/process"]
 derive-more = ["dep:derive_more"]
 
 ## Enables interacting with a host clipboard via [`clipboard`](clipboard/index.html)
-osc52 = ["dep:base64"]
+osc52 = []
 
 [dependencies]
-base64 = { version = "0.22", optional = true }
+base64 = "0.22"
 bitflags = { version = "2.9" }
 derive_more = { version = "2.0.0", features = ["is_variant"], optional = true }
 document-features = "0.2.11"

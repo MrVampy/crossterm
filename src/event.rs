@@ -54,6 +54,7 @@
 //!             #[cfg(feature = "bracketed-paste")]
 //!             Event::Paste(data) => println!("{:?}", data),
 //!             Event::Resize(width, height) => println!("New size {}x{}", width, height),
+//!             Event::Clipboard(_) | Event::PrivateMode { .. } => {},
 //!         }
 //!     }
 //!     execute!(
@@ -100,6 +101,7 @@
 //!                 #[cfg(feature = "bracketed-paste")]
 //!                 Event::Paste(data) => println!("Pasted {:?}", data),
 //!                 Event::Resize(width, height) => println!("New size {}x{}", width, height),
+//!                 Event::Clipboard(_) | Event::PrivateMode { .. } => {},
 //!             }
 //!         } else {
 //!             // Timeout expired and no `Event` is available
@@ -545,7 +547,6 @@ impl Command for PopKeyboardEnhancementFlags {
 /// Represents an event.
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "derive-more", derive(IsVariant))]
-#[cfg_attr(not(feature = "bracketed-paste"), derive(Copy))]
 #[derive(Debug, PartialOrd, PartialEq, Eq, Clone, Hash)]
 pub enum Event {
     /// The terminal gained focus
@@ -563,7 +564,18 @@ pub enum Event {
     /// An resize event with new dimensions after resize (columns, rows).
     /// **Note** that resize events can occur in batches.
     Resize(u16, u16),
+    Clipboard(ClipboardEvent),
+    PrivateMode {
+        mode: u16,
+        state: u8,
+    },
 }
+
+mod clipboard;
+pub use clipboard::{
+    ClipboardEvent, ClipboardRead, ClipboardResponse, DisableMimePaste, EnableMimePaste,
+    QueryMimePaste,
+};
 
 impl Event {
     /// Returns `true` if the event is a key press event.
