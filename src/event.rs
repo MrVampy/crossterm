@@ -573,8 +573,8 @@ pub enum Event {
 
 mod clipboard;
 pub use clipboard::{
-    ClipboardEvent, ClipboardRead, ClipboardResponse, DisableMimePaste, EnableMimePaste,
-    QueryMimePaste,
+    ClipboardEvent, ClipboardLocation, ClipboardRead, ClipboardResponse, DisableMimePaste,
+    EnableMimePaste, QueryMimePaste,
 };
 
 impl Event {
